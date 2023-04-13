@@ -3,7 +3,7 @@ using SchoolManagementApp.MVC.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// Add services to the IoC container.
 var conn = builder.Configuration.GetConnectionString("SchoolManagementLocalConnection");
 // Options that will get passed down to our DbContext in the options
 builder.Services.AddDbContext<SchoolMgmtContext>(q => q.UseSqlServer(conn));
