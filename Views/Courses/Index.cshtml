@@ -27,7 +27,6 @@
     </thead>
     <tbody>
         @foreach (var item in Model)
-
         {
             <tr>
                 <td>
@@ -42,10 +41,45 @@
                 <td>
                     <a asp-action="Edit" class="btn btn-warning" asp-route-id="@item.Id">Edit</a>
                     <a asp-action="Details" class="btn btn-primary" asp-route-id="@item.Id">Details</a>
-                    <a asp-action="Delete" class="btn btn-danger" asp-route-id="@item.Id">Delete</a>
+                    <button data-id="@item.Id" class="btn btn-danger deleteBtn" type="button">Delete</button>
                 </td>
             </tr>
-
         }
     </tbody>
 </table>
+
+<form asp-action="Delete" id="courseDeleteForm">
+    <input type="hidden" id="courseid" name="Id" />
+</form>
+
+@section Scripts {
+<script>
+    $(function () {
+        $('.deleteBtn').click(function (e) {
+            /* Insert code from 2 */
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire(
+                        'Deleted!',
+                        'Your file has been deleted.',
+                        'success'
+                    )
+                    var btn = $(this);
+                    var id = btn.data("id");
+                    $('#courseid').val(id);
+                    $('#courseDeleteForm').submit();
+                }
+            })
+
+        })
+    })
+</script>
+}
