@@ -31,6 +31,15 @@ public class StudentMetaData
     public DateTime? DateOfBirth { get; set; }
 }
 
+public class ClassMetaData
+{
+    [Display(Name = "Lecturer")]
+    public int? LecturerId { get; set; }
+
+    [Display(Name = "Course")]
+    public int? CourseId { get; set; }
+}
+
 // Connect Metadata to each Data Model class
 [ModelMetadataType(typeof(CourseMetaData))]
 public partial class Course { }
@@ -40,3 +49,6 @@ public partial class Lecturer { }
 
 [ModelMetadataType(typeof(StudentMetaData))]
 public partial class Student { }
+
+[ModelMetadataType(typeof(ClassMetaData))]
+public partial class Class { }
