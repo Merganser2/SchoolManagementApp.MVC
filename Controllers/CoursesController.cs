@@ -21,9 +21,9 @@ namespace SchoolManagementApp.MVC.Controllers
         // GET: Courses
         public async Task<IActionResult> Index()
         {
-              return _context.Courses != null ? 
-                          View(await _context.Courses.ToListAsync()) :
-                          Problem("Entity set 'SchoolMgmtContext.Courses'  is null.");
+            return _context.Courses != null ?
+                        View(await _context.Courses.ToListAsync()) :
+                        Problem("Entity set 'SchoolMgmtContext.Courses'  is null.");
         }
 
         // GET: Courses/Details/5
@@ -149,14 +149,14 @@ namespace SchoolManagementApp.MVC.Controllers
             {
                 _context.Courses.Remove(course);
             }
-            
+
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
         private bool CourseExists(int id)
         {
-          return (_context.Courses?.Any(e => e.Id == id)).GetValueOrDefault();
+            return (_context.Courses?.Any(e => e.Id == id)).GetValueOrDefault();
         }
     }
 }
