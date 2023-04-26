@@ -45,11 +45,28 @@ namespace SchoolManagementApp.MVC.Controllers
             return View(@class);
         }
 
+        // Display user relevant Course and Lecturer data for Class Create, Edit
+        private void BuildSelectLists()
+        {
+            var courses = _context.Courses.Select(q => new
+            {
+                CourseNameDetails = $"{q.Code} {q.CourseName} ({q.Credits} Credits)",
+                q.Id
+            });
+            ViewData["CourseId"] = new SelectList(courses, "Id", "CourseNameDetails");
+
+            var lecturers = _context.Lecturers.Select(q => new
+            {
+                FullName = $"{q.LastName}, {q.FirstName}",
+                q.Id
+            });
+            ViewData["LecturerId"] = new SelectList(lecturers, "Id", "FullName");
+        }
+
         // GET: Classes/Create
         public IActionResult Create()
         {
-            ViewData["CourseId"] = new SelectList(_context.Courses, "Id", "Id");
-            ViewData["LecturerId"] = new SelectList(_context.Lecturers, "Id", "Id");
+            BuildSelectLists();
             return View();
         }
 
@@ -66,8 +83,8 @@ namespace SchoolManagementApp.MVC.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["CourseId"] = new SelectList(_context.Courses, "Id", "Id", @class.CourseId);
-            ViewData["LecturerId"] = new SelectList(_context.Lecturers, "Id", "Id", @class.LecturerId);
+            // If Post fails, redisplay records
+            BuildSelectLists();
             return View(@class);
         }
 
@@ -84,8 +101,8 @@ namespace SchoolManagementApp.MVC.Controllers
             {
                 return NotFound();
             }
-            ViewData["CourseId"] = new SelectList(_context.Courses, "Id", "Id", @class.CourseId);
-            ViewData["LecturerId"] = new SelectList(_context.Lecturers, "Id", "Id", @class.LecturerId);
+
+            BuildSelectLists();
             return View(@class);
         }
 
@@ -121,8 +138,7 @@ namespace SchoolManagementApp.MVC.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["CourseId"] = new SelectList(_context.Courses, "Id", "Id", @class.CourseId);
-            ViewData["LecturerId"] = new SelectList(_context.Lecturers, "Id", "Id", @class.LecturerId);
+            BuildSelectLists();
             return View(@class);
         }
 
