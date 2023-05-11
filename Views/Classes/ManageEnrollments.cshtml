@@ -1,0 +1,77 @@
+@model SchoolManagementApp.MVC.Models.ClassEnrollmentViewModel
+
+@{
+    ViewData["Title"] = "Manage Enrollments";
+}
+
+<h2>Manage Enrollments for @Model.Class.Time session of @Model.Class.Course.Code - @Model.Class.Course.CourseName</h2>
+<h3><Instructor: @Model.Class.Lecturer.FirstName @Model.Class.Lecturer.LastName/h3>
+
+
+<hr>
+<h3>Student List </h3>
+<table>
+    <thead>
+        <tr>
+        <th>First Name</th>
+        <th>Last Name</th>
+        <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach(var student in Model.Students){
+            <tr>
+                <td>@student.FirstName</td>
+                <td>@student.LastName</td>
+                @{
+                    string btnText = student.IsEnrolled ? "Remove" : "Add";
+                    string btnClass = student.IsEnrolled ? "danger" : "success";
+                    bool shouldEnroll = !student.IsEnrolled;
+                }
+                <td>
+                    <button data-studentId=@student.Id data-shouldEnroll=@shouldEnroll 
+                     class="btn-@btnClass enrollmentBtn" type="button">@btnText</button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<form asp-action="EnrollStudent" id="ClassEnrollmentForm">
+<input type="hidden" id="classId" name="ClassId" value="@Model.Class.Id"/> 
+<input type="hidden" id="studentId" name="StudentId" />
+<input type="hidden" id="shouldEnroll" name="ShouldEnroll" /> 
+</form>
+
+<hr>
+<div>
+    <a asp-action="Index">Back to Classes</a>
+</div>
+
+@section Scripts {
+<script>
+    $(function () {
+        $('.enrollmentBtn').click(function (e) {
+            /* Insert code from 2 */
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "Please confirm this action",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Confirm Enrollment Change'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    var btn = $(this);
+                    var studentId = btn.attr("data-studentId"); // TODO: Why did this work: btn.data("id"); but not btn.data("studentId")
+                    $('#studentId').val(studentId);
+                    $('#shouldEnroll').val(shouldEnroll);
+                    $('#ClassEnrollmentForm').submit();
+                }
+            })
+
+        })
+    })
+</script>
+}

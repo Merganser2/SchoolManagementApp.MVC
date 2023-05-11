@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using SchoolManagementApp.MVC.Data;
+using SchoolManagementApp.MVC.Models;
 
 namespace SchoolManagementApp.MVC.Controllers
 {
@@ -179,6 +180,67 @@ namespace SchoolManagementApp.MVC.Controllers
 
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
+        }
+
+        public async Task<IActionResult> ManageEnrollments(int id)
+        { 
+            var @class = await _context.Classes
+            .Include(c => c.Course)
+            .Include(c => c.Lecturer)
+            .Include(c => c.Enrollments)
+               .ThenInclude(c => c.Student)  // TODO: revisit this
+            .FirstOrDefaultAsync(m => m.Id == id);
+            
+            var @students = await _context.Students.ToListAsync();
+
+            // Transform to View Model
+            var model = new ClassEnrollmentViewModel();
+            model.Class = @class; 
+
+            // Add Enrollment data to the student list, check if student is enrolled in the class
+            foreach (var student in students)
+            {
+                model.Students.Add(new StudentEnrollmentViewModel(){
+                    Id = student.Id,
+                    FirstName = student.FirstName,
+                    LastName = student.LastName,
+                    IsEnrolled = (@class?.Enrollments?.Any(q => q.StudentId == student.Id)).GetValueOrDefault()
+                }); // 
+            }
+            return View(model);
+        }
+
+        [HttpPost, ActionName("EnrollStudent")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EnrollStudent(int classId, int studentId, bool shouldEnroll)
+        {
+            var enrollment = new Enrollment();
+
+            if (shouldEnroll)
+            {
+                enrollment.ClassId = classId;
+                enrollment.StudentId = studentId;
+                // Add the enrollment to the Data table; Entity Framework will determine the correct table by the data type
+                await _context.AddAsync(enrollment);
+            }
+            else
+            {
+                // Get the first matching record from the database. We don't have the id, but we have the Class and Student Id;
+                //  there can be only one record on which they match (a student can't be enrolled twice in same class).
+                // This time we must specify the Enrollments table 
+                enrollment = await _context.Enrollments.FirstOrDefaultAsync(
+                    q => q.ClassId == classId && q.StudentId == studentId);
+                if (enrollment != null)
+                {
+                    _context.Remove(enrollment);
+                    // Could also have been more explicit:
+                    // _context.Enrollments.Remove(enrollment);
+                    // But again the table is clear to Entity Framework because of the type passed
+                }
+            }
+
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(ManageEnrollments), new {id = classId}); // TODO: understand better this route values object
         }
 
         private bool ClassExists(int id)
