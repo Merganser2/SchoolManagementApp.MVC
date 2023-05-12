@@ -182,15 +182,14 @@ namespace SchoolManagementApp.MVC.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-// TODO: WHY DID changing id to classId cause query to fail????????? or rather id to be 0 ???
-        public async Task<IActionResult> ManageEnrollments(int id)
+        public async Task<IActionResult> ManageEnrollments(int classId)
         { 
             var @class = await _context.Classes
                 .Include(c => c.Course)
                 .Include(c => c.Lecturer)
                 .Include(c => c.Enrollments)
                     .ThenInclude(c => c.Student)  // TODO: revisit this
-            .FirstOrDefaultAsync(m => m.Id == id);
+            .FirstOrDefaultAsync(m => m.Id == classId);
             
             var @students = await _context.Students.ToListAsync();
 
@@ -214,7 +213,7 @@ namespace SchoolManagementApp.MVC.Controllers
                     FirstName = student.FirstName,
                     LastName = student.LastName,
                     IsEnrolled = (@class?.Enrollments?.Any(q => q.StudentId == student.Id)).GetValueOrDefault()
-                }); // 
+                });  
             }
             return View(model);
         }
@@ -250,7 +249,7 @@ namespace SchoolManagementApp.MVC.Controllers
 
             await _context.SaveChangesAsync();
             // 2nd param of redirect is an object whose purpose is only to route values to the action
-            return RedirectToAction(nameof(ManageEnrollments), new {id = classId}); 
+            return RedirectToAction(nameof(ManageEnrollments), new {classId = classId}); 
         }
 
         private bool ClassExists(int id)
