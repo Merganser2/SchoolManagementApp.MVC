@@ -182,20 +182,29 @@ namespace SchoolManagementApp.MVC.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+// TODO: WHY DID changing id to classId cause query to fail????????? or rather id to be 0 ???
         public async Task<IActionResult> ManageEnrollments(int id)
         { 
             var @class = await _context.Classes
-            .Include(c => c.Course)
-            .Include(c => c.Lecturer)
-            .Include(c => c.Enrollments)
-               .ThenInclude(c => c.Student)  // TODO: revisit this
+                .Include(c => c.Course)
+                .Include(c => c.Lecturer)
+                .Include(c => c.Enrollments)
+                    .ThenInclude(c => c.Student)  // TODO: revisit this
             .FirstOrDefaultAsync(m => m.Id == id);
             
             var @students = await _context.Students.ToListAsync();
 
             // Transform to View Model
             var model = new ClassEnrollmentViewModel();
-            model.Class = @class; 
+
+// TODO: Handle errors if class is null
+            // Get class info from Data Model (@class) into View Model
+            model.Class = new ClassViewModel {
+                Id = @class.Id,
+                CourseName = $"{@class.Course?.Id} - {@class.Course?.CourseName}",
+                LecturerName = $"{@class.Lecturer?.FirstName} {@class.Lecturer?.LastName}",
+                CourseTime = @class.Time?.ToString()
+            }; 
 
             // Add Enrollment data to the student list, check if student is enrolled in the class
             foreach (var student in students)
@@ -240,7 +249,8 @@ namespace SchoolManagementApp.MVC.Controllers
             }
 
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(ManageEnrollments), new {id = classId}); // TODO: understand better this route values object
+            // 2nd param of redirect is an object whose purpose is only to route values to the action
+            return RedirectToAction(nameof(ManageEnrollments), new {id = classId}); 
         }
 
         private bool ClassExists(int id)

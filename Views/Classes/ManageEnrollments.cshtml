@@ -4,8 +4,8 @@
     ViewData["Title"] = "Manage Enrollments";
 }
 
-<h2>Manage Enrollments for @Model.Class.Time session of @Model.Class.Course.Code - @Model.Class.Course.CourseName</h2>
-<h3><Instructor: @Model.Class.Lecturer.FirstName @Model.Class.Lecturer.LastName/h3>
+<h2>Manage Enrollments for @Model.Class.CourseTime session of @Model.Class.CourseName</h2>
+<h3>Instructor: @Model.Class.LecturerName</h3>
 
 
 <hr>
@@ -65,6 +65,7 @@
                 if (result.isConfirmed) {
                     var btn = $(this);
                     var studentId = btn.attr("data-studentId"); // TODO: Why did this work: btn.data("id"); but not btn.data("studentId")
+                    var shouldEnroll = btn.attr("data-shouldEnroll");
                     $('#studentId').val(studentId);
                     $('#shouldEnroll').val(shouldEnroll);
                     $('#ClassEnrollmentForm').submit();
