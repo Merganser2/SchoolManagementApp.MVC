@@ -1,3 +1,5 @@
+using AspNetCoreHero.ToastNotification;
+using AspNetCoreHero.ToastNotification.Extensions;
 using Microsoft.EntityFrameworkCore;
 using SchoolManagementApp.MVC.Data;
 
@@ -8,6 +10,13 @@ var conn = builder.Configuration.GetConnectionString("SchoolManagementLocalConne
 // Options that will get passed down to our DbContext in the options
 builder.Services.AddDbContext<SchoolMgmtContext>(q => q.UseSqlServer(conn));
 builder.Services.AddControllersWithViews();
+// Add Notification service and set up its options
+builder.Services.AddNotyf(c =>
+{
+    c.DurationInSeconds = 5;
+    c.IsDismissable = true;
+    c.Position = NotyfPosition.TopRight;
+});
 
 var app = builder.Build();
 
@@ -24,7 +33,9 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+// app.UseAuthentication; TODO: add this later for Auth0
 app.UseAuthorization();
+app.UseNotyf(); // Middleware for toast notifications
 
 app.MapControllerRoute(
     name: "default",

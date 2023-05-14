@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AspNetCoreHero.ToastNotification.Abstractions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -13,10 +14,12 @@ namespace SchoolManagementApp.MVC.Controllers
     public class ClassesController : Controller
     {
         private readonly SchoolMgmtContext _context;
+        private readonly INotyfService _notyfService;
 
-        public ClassesController(SchoolMgmtContext context)
+        public ClassesController(SchoolMgmtContext context, INotyfService inotyfService)
         {
             _context = context;
+            this._notyfService = inotyfService;
         }
 
         // GET: Classes
@@ -200,7 +203,7 @@ namespace SchoolManagementApp.MVC.Controllers
             // Get class info from Data Model (@class) into View Model
             model.Class = new ClassViewModel {
                 Id = @class.Id,
-                CourseName = $"{@class.Course?.Id} - {@class.Course?.CourseName}",
+                CourseName = $"{@class.Course?.Code} - {@class.Course?.CourseName}",
                 LecturerName = $"{@class.Lecturer?.FirstName} {@class.Lecturer?.LastName}",
                 CourseTime = @class.Time?.ToString()
             }; 
@@ -230,6 +233,7 @@ namespace SchoolManagementApp.MVC.Controllers
                 enrollment.StudentId = studentId;
                 // Add the enrollment to the Data table; Entity Framework will determine the correct table by the data type
                 await _context.AddAsync(enrollment);
+                _notyfService.Success($"Student enrolled successfully");
             }
             else
             {
@@ -244,12 +248,18 @@ namespace SchoolManagementApp.MVC.Controllers
                     // Could also have been more explicit:
                     // _context.Enrollments.Remove(enrollment);
                     // But again the table is clear to Entity Framework because of the type passed
+                    _notyfService.Warning($"Student unenrolled successfully");
                 }
             }
 
             await _context.SaveChangesAsync();
             // 2nd param of redirect is an object whose purpose is only to route values to the action
-            return RedirectToAction(nameof(ManageEnrollments), new {classId = classId}); 
+            //  In this case we are setting ManageEnrollments parameter "classId" to the "classId"
+            //   parameter of this method (EnrollStudents). Thus we could code it like so:
+            // return RedirectToAction(nameof(ManageEnrollments), new {classId = classId});
+            //   Or we can just supply the parameter "classId" from this method; the
+            //   parameter name will then be inferred to also be "classId". 
+            return RedirectToAction(nameof(ManageEnrollments), new {classId}); 
         }
 
         private bool ClassExists(int id)
